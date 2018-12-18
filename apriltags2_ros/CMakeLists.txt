@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 # Set the build type.  Options are:
@@ -63,7 +63,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS apriltags2 geometry_msgs image_transport roscpp sensor_msgs std_msgs message_runtime cv_bridge tf nodelet pluginlib
-  DEPENDS Eigen OpenCV
+  DEPENDS OpenCV
 )
 
 ###########
@@ -72,7 +72,7 @@ catkin_package(
 
 include_directories(include
   ${catkin_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -80,7 +80,7 @@ add_library(common src/common_functions.cpp)
 add_dependencies(common ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(common
   ${catkin_LIBRARIES}
-  ${Eigen_LIBRARIES}
+  ${Eigen3_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
 
@@ -115,4 +115,32 @@ add_dependencies(${PROJECT_NAME}_single_image_client_node ${PROJECT_NAME}_genera
 target_link_libraries(${PROJECT_NAME}_single_image_client_node
   common
   ${catkin_LIBRARIES}
+)
+
+########################################################
+# Installs
+########################################################
+
+install(
+  DIRECTORY
+    include/${PROJECT_NAME}/
+  DESTINATION
+    ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)
+
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(FILES nodelet_plugins.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(TARGETS
+    common
+    continuous_detector
+    single_image_detector
+    ${PROJECT_NAME}_continuous_node
+    ${PROJECT_NAME}_single_image_server_node
+    ${PROJECT_NAME}_single_image_client_node
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
