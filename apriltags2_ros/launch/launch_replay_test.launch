@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!--Required-->
+  <arg name="apriltags2" default="true"/>
+  <arg name="ximea" default="true"/>
+  <arg name="usb_cam" default="false"/>
+  <arg name="ximea_color_mode" default="bw"/>
+  <arg name="ocr_camera" default="usb_cam"/>
+  <arg name="live" default="true"/>
+  <arg name="replay" default="false"/>
+  <arg name="cam_n" default="COMAU1707000"/>
+  <arg name="lens_make" default="computar_25_p5sp"/>
+  <arg name="cam_sens" default="3.45"/> 
+  <arg name="cam_lens" default="16.5"/>
+  <!--Live only-->
+  <group if="$(arg live)">
+  	<group if="$(arg ximea)">
+      <include file="$(find visim)/launch/cameras/ximea.launch">
+        <arg name="cam_ser" default="$(arg cam_n)"/>
+        <arg name="ximea_color_mode" default="$(arg ximea_color_mode)"/>
+        <arg name="lens_make" default="$(arg lens_make)"/>
+      </include>
+    </group>
+    <group if="$(arg usb_cam)">
+      <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+        <param name="video_device" value="/dev/video0" />
+        <param name="image_width" value="640" />
+        <param name="image_height" value="480" />
+        <param name="pixel_format" value="yuyv" />
+        <param name="camera_frame_id" value="usb_cam" />
+        <param name="io_method" value="mmap"/>
+      </node>
+    </group>
+  </group>
+
+  <group if="$(arg apriltags2)">
+    <include file="$(find apriltags2_ros)/launch/continuous_detection.launch">
+      <arg name="node_namespace" default="apriltags2_ros_continuous_node" />
+      <arg name="camera_name" default="/$(arg ocr_camera)" />
+      <arg name="camera_frame" default="$(arg ocr_camera)" />
+      <arg name="image_topic" default="image_raw" />
+    </include>
+  </group>
+  <!--Replay only-->
+  <group if="$(arg replay)">
+    <node name="rqt_bag" pkg="rqt_bag" type="rqt_bag" required="false"/>
+  </group>
+
+
+</launch>
